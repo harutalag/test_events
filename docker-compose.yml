@@ -1,0 +1,33 @@
+version: '2.4'
+
+services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: username
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: dbname
+  web:
+    image: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ${SRC_ROOT}:/app
+      - ./.docker/nginx/sites/${ENV}.conf:/etc/nginx/conf.d/default.conf
+      - ./.docekr/nginx/${ENV}.default.conf:/etc/nginx/${ENV}.default.conf
+    links:
+      - php
+
+  php:
+    extends:
+      file: .docker/base-php/base-php.yml
+      service: base-php
+    restart: always
+    working_dir: /app
+    volumes:
+      - ${SRC_ROOT}:/app
+    links:
+      - db
